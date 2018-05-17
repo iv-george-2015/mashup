@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CPM Diagram Sample</title>
+</head>
+
+<!-- CSS link files  -->
+<LINK href="./css/container.css" rel="stylesheet" type="text/css">
+<LINK href="./css/level.css" rel="stylesheet" type="text/css">
+<LINK href="./css/node.css" rel="stylesheet" type="text/css">
+
+<!-- JS files to Load -->
+<script type="text/javascript" src="./JS/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="./JS/config.js"></script>
+<script type="text/javascript" src="./JS/container.js"></script>
+<script type="text/javascript" src="./JS/overlay.js"></script>
+<script type="text/javascript" src="./JS/data-modeller.js"></script>
+<script type="text/javascript" src="./JS/data.js"></script>
+<script type="text/javascript" src="./JS/activity-list.js"></script>
+<style>
+#cover{
+width : 500px;
+overflow: auto;
+}
+</style>
+
+<script type="text/javascript">
+var $container1;
+var $container2;
+var $container3;
+
+var $activityList;
+
+$(document).ready(function(){
+	
+	$container1 = new Container("trial1",activity_data2);
+	$container2 = new Container("trial2",activity_data1);
+	$container3 = new Container("trial3",activity_data); 
+	
+	$container1.create();
+	$container2.create();
+	$container3.create(); 
+	
+	$activityList = new ActivityLinkedList(activity_data2,$container1);
+	$activityList1 = new ActivityLinkedList(activity_data1,$container2);
+	$activityList2 = new ActivityLinkedList(activity_data,$container3);
+	
+});
+
+
+</script>
+<body>
+<div id="trial-sample">
+</div>
+</body>
+</html>
