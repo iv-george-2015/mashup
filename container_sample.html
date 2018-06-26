@@ -34,17 +34,22 @@ var $activityList;
 
 $(document).ready(function(){
 	
-	$container1 = new Container("trial1",activity_data2);
-	$container2 = new Container("trial2",activity_data1);
-	$container3 = new Container("trial3",activity_data); 
+	$container1 = new Container("trial1");
+	$container2 = new Container("trial2");
+	
+/* 	$container2 = new Container("trial2",activity_data1);
+	$container3 = new Container("trial3",activity_data);  */
 	
 	$container1.create();
-	$container2.create();
-	$container3.create(); 
+	$container1.drawActivityDiagram(activity_data1);
 	
+	$container2.create();
+	$container2.drawActivityDiagram(activity_data2);
+
+	/* 
 	$activityList = new ActivityLinkedList(activity_data2,$container1);
 	$activityList1 = new ActivityLinkedList(activity_data1,$container2);
-	$activityList2 = new ActivityLinkedList(activity_data,$container3);
+	$activityList2 = new ActivityLinkedList(activity_data,$container3); */
 	
 });
 
