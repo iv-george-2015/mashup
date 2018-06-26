@@ -1,0 +1,9 @@
+@CHARSET "UTF-8";
+
+.level {
+	height: inherit;
+	display: inline-flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-content: center;
+}

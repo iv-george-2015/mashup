@@ -1,0 +1,20 @@
+@CHARSET "UTF-8";
+
+.node {
+	background-color: #d5f4e6;
+	width: 100px;
+	height: 30px;
+	border: 2px solid #80ced6;
+	border-radius: 10px;
+	margin: 20px;
+	z-index: 100;
+}
+
+.node:hover {
+	transform: scale(1.1);
+}
+
+.node .critical{
+	border: 2px solid #f70d22;
+	background-color: #e4c3e6;
+}
