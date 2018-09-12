@@ -83,34 +83,37 @@ function Container(id, opt_data) {
 				overlay_.drawCurvedline(node1ConntorPts1.rightEndPtX,
 						node1ConntorPts1.rightEndPtY,
 						node2ConntorPts2.leftEndPtX,
-						node2ConntorPts2.leftEndPtY, '#FAEBD7', 0.1);
+						node2ConntorPts2.leftEndPtY, '#90afc5', 0.1);
 			}
 		}
 	}
+
 	function drawLevelTree_() {
 		var levelTree = dataModeller_.getLevelsTree();
+		var activityList = dataModeller_.getData();
+
 		for (level in levelTree) {
 			for (node in levelTree[level]) {
 				this.addNode(level, levelTree[level][node]);
 			}
 		}
-		var activityList = dataModeller_.getData();
+
 		connectNodes_.call(this, activityList);
 	}
 	function drawNodeEndpoints_(nodeName) {
 
-		var connectorPts = getCircleDrawPoint_.call(this,nodeName, 2);
-		overlay_.drawCircle(connectorPts.rightEndPtX,
-				connectorPts.rightEndPtY, 5, '#FAEBD7');
+		var connectorPts = getCircleDrawPoint_.call(this, nodeName, 2);
+		overlay_.drawCircle(connectorPts.rightEndPtX, connectorPts.rightEndPtY,
+				5, '#90afc5');
 	}
-	
+
 	function getCircleDrawPoint_(nodeName, radius) {
 		var nodeMargin = 20;
 		var nodeWidth = 100;
 		var nodeHeight = 30;
 		var nodeBoder = 2;
 
-		var node = getNode_.call(this,nodeName);
+		var node = getNode_.call(this, nodeName);
 		var nodePos = $(node).position();
 
 		var nodePosLeft = nodePos.left;
@@ -124,14 +127,14 @@ function Container(id, opt_data) {
 		var overlayLeft = overlayPos.left;
 		var overlayTop = overlayPos.top;
 
-		var relativeXRight = nodePosLeft - overlayLeft + nodeMargin + nodeWidth + 2
-				* nodeBoder + radius / 2;
-		var relativeYRight = nodePosTop - overlayTop + nodeMargin + nodeHeight / 2
-				+ 2 * nodeBoder;
+		var relativeXRight = nodePosLeft - overlayLeft + nodeMargin + nodeWidth
+				+ 2 * nodeBoder + radius / 2;
+		var relativeYRight = nodePosTop - overlayTop + nodeMargin + nodeHeight
+				/ 2 + 2 * nodeBoder;
 
 		var relativeXLeft = nodePosLeft - overlayLeft + nodeMargin;
-		var relativeYLeft = nodePosTop - overlayTop + nodeMargin + nodeHeight / 2
-				+ 2 * nodeBoder;
+		var relativeYLeft = nodePosTop - overlayTop + nodeMargin + nodeHeight
+				/ 2 + 2 * nodeBoder;
 
 		return {
 			rightEndPtX : relativeXRight,
@@ -140,7 +143,7 @@ function Container(id, opt_data) {
 			leftEndPtY : relativeYLeft
 		};
 	}
-	
+
 	function markCritical_(cpList) {
 		for (x in cpList) {
 			getNode_(cpList[x]).style.backgroundColor = '#e4c3e6';
@@ -148,15 +151,15 @@ function Container(id, opt_data) {
 		}
 
 	}
-	
+
 	this.create = function() {
 		// Append 'DIV' element if no such DIV element exist .
 		// Add CSS property to it .
 		var x = defTemplateConfig.getConfig('container').element;
 		containerElement_ = $('#' + id_);
 		if (!containerElement_.is(x)) {
-			containerElement_ = $("<div></div>").attr("id", id_)
-					.appendTo(document.body);
+			containerElement_ = $("<div></div>").attr("id", id_).appendTo(
+					document.body);
 		}
 
 		containerElement_.addClass("container");
@@ -165,7 +168,7 @@ function Container(id, opt_data) {
 			this.redraw();
 		}.bind(this));
 	}
-	
+
 	this.createLevels = function(level) {
 		if (containerElement_ != null) {
 			for (var i = 0; i < level; i++)
@@ -175,9 +178,67 @@ function Container(id, opt_data) {
 
 	this.addNode = function(level, node) {
 		var selector = "div.level:eq(" + level + ")";
-		$("<div></div>").attr("id", id_ + '-' + node['activity-name'])
-				.addClass("node").appendTo(
-						containerElement_.find(selector));
+		var nodeDiv = $("<div></div>").attr("id",
+				id_ + '-' + node['activity-name']).addClass("node").appendTo(
+				containerElement_.find(selector));
+		$(nodeDiv).append("<span>" + node['activity-name'] + "</span>");
+
+		// add data to event while assigning handler .
+		$(nodeDiv).mouseenter(
+				node['activity-name'],
+				function(evt) {
+					var nodeInfo = this.getActivityList().getActivityMap().get(
+							node['activity-name']);
+					var followers = [];
+					followers = nodeInfo['followers'];
+					var val;
+					for(x in followers){
+					val = this.getActivityList().getActivityMap().get(followers[x])['est_'] - nodeInfo['eft_'] - 1;
+						if (val > 0){
+							return;
+						}
+					}
+				
+					var displayData = {
+						'header' : node['activity-name'],
+						'list' : [ {
+							'label' : 'Duration',
+							'value' : nodeInfo['duration_']
+						}, {
+							'label' : 'EST',
+							'value' : nodeInfo['est_']
+						}, {
+							'label' : 'EFT',
+							'value' : nodeInfo['eft_']
+						}, {
+							'label' : 'LST',
+							'value' : nodeInfo['lst_']
+						}, {
+							'label' : 'LFT',
+							'value' : nodeInfo['lft_']
+						}, {
+							'label' : 'TOTAL FLOAT',
+							'value' : nodeInfo['lft_'] - nodeInfo['eft_']
+						}, {
+							'label' : 'FREE FLOAT',
+							'value' : val
+						}
+						
+						]
+					}
+					Tooltip.getInstance().show(evt, displayData);
+					this.highlightNodes(nodeInfo['predecessors'],'#f4b400');
+					this.highlightNodes(nodeInfo['followers'],'#0f9d58');
+				}.bind(this));
+
+		$(nodeDiv).mouseleave(function(evt) {
+			Tooltip.getInstance().hide(evt);
+			this.redraw();
+		}.bind(this));
+		
+		$(nodeDiv).mousemove(function(evt) {
+			Tooltip.getInstance().show(evt);
+		}.bind(this));
 		setOverlay_.call(this);
 	}
 
@@ -194,8 +255,23 @@ function Container(id, opt_data) {
 		this.createLevels(dataModeller_.getLevels());
 		drawLevelTree_.call(this);
 		activityList_ = new ActivityLinkedList(dataModeller_);
-		markCritical_.call(this,activityList_.getCriticalPath());
+		markCritical_.call(this, activityList_.getCriticalPath());
 
+	}
+
+	this.getActivityList = function() {
+		return activityList_;
+	}
+
+	this.highlightNodes = function(nodeList,color) {
+		for (node in nodeList) {
+			$(getNode_(nodeList[node])).css("background-color",
+					color);
+		}
+	}
+	
+	this.removeHighlightedNodes = function(){
+		this.redraw();
 	}
 }
 
@@ -216,12 +292,12 @@ function Container(id, opt_data) {
 // }.bind(this));
 // }
 
-//Container.prototype.createLevels_ = function(level) {
-//	if (this.containerElement_ != null) {
-//		for (var i = 0; i < level; i++)
-//			$("<div></div>").addClass("level").appendTo(this.containerElement_);
-//	}
-//}
+// Container.prototype.createLevels_ = function(level) {
+// if (this.containerElement_ != null) {
+// for (var i = 0; i < level; i++)
+// $("<div></div>").addClass("level").appendTo(this.containerElement_);
+// }
+// }
 
 // Container.prototype.addNode = function(level, node) {
 // var selector = "div.level:eq(" + level + ")";
@@ -291,42 +367,42 @@ function Container(id, opt_data) {
 // };
 // }
 
-//Container.prototype.getCircleDrawPoint_ = function(nodeName, radius) {
-//	var nodeMargin = 20;
-//	var nodeWidth = 100;
-//	var nodeHeight = 30;
-//	var nodeBoder = 2;
+// Container.prototype.getCircleDrawPoint_ = function(nodeName, radius) {
+// var nodeMargin = 20;
+// var nodeWidth = 100;
+// var nodeHeight = 30;
+// var nodeBoder = 2;
 //
-//	var node = getNode_.call(this,nodeName);
-//	var nodePos = $(node).position();
+// var node = getNode_.call(this,nodeName);
+// var nodePos = $(node).position();
 //
-//	var nodePosLeft = nodePos.left;
-//	var nodePosTop = nodePos.top;
+// var nodePosLeft = nodePos.left;
+// var nodePosTop = nodePos.top;
 //
-//	var containerMarginLeft = 2;
-//	var containerMarginTop = 2;
+// var containerMarginLeft = 2;
+// var containerMarginTop = 2;
 //
-//	var overlayPos = $(this.overlay_.getElement()).position();
+// var overlayPos = $(this.overlay_.getElement()).position();
 //
-//	var overlayLeft = overlayPos.left;
-//	var overlayTop = overlayPos.top;
+// var overlayLeft = overlayPos.left;
+// var overlayTop = overlayPos.top;
 //
-//	var relativeXRight = nodePosLeft - overlayLeft + nodeMargin + nodeWidth + 2
-//			* nodeBoder + radius / 2;
-//	var relativeYRight = nodePosTop - overlayTop + nodeMargin + nodeHeight / 2
-//			+ 2 * nodeBoder;
+// var relativeXRight = nodePosLeft - overlayLeft + nodeMargin + nodeWidth + 2
+// * nodeBoder + radius / 2;
+// var relativeYRight = nodePosTop - overlayTop + nodeMargin + nodeHeight / 2
+// + 2 * nodeBoder;
 //
-//	var relativeXLeft = nodePosLeft - overlayLeft + nodeMargin;
-//	var relativeYLeft = nodePosTop - overlayTop + nodeMargin + nodeHeight / 2
-//			+ 2 * nodeBoder;
+// var relativeXLeft = nodePosLeft - overlayLeft + nodeMargin;
+// var relativeYLeft = nodePosTop - overlayTop + nodeMargin + nodeHeight / 2
+// + 2 * nodeBoder;
 //
-//	return {
-//		rightEndPtX : relativeXRight,
-//		rightEndPtY : relativeYRight,
-//		leftEndPtX : relativeXLeft,
-//		leftEndPtY : relativeYLeft
-//	};
-//}
+// return {
+// rightEndPtX : relativeXRight,
+// rightEndPtY : relativeYRight,
+// leftEndPtX : relativeXLeft,
+// leftEndPtY : relativeYLeft
+// };
+// }
 
 // Container.prototype.drawActivityDiagram = function(data) {
 // this.data_ = data;
@@ -338,13 +414,13 @@ function Container(id, opt_data) {
 //
 // }
 
-//Container.prototype.markCritical_ = function(cpList) {
-//	for (x in cpList) {
-//		this.getNode_(cpList[x]).style.backgroundColor = '#e4c3e6';
-//		this.getNode_(cpList[x]).style.borderColor = '#f70d22';
-//	}
+// Container.prototype.markCritical_ = function(cpList) {
+// for (x in cpList) {
+// this.getNode_(cpList[x]).style.backgroundColor = '#e4c3e6';
+// this.getNode_(cpList[x]).style.borderColor = '#f70d22';
+// }
 //
-//}
+// }
 
 // Container.prototype.drawLevelTree_ = function() {
 // var levelTree = this.dataModeller_.getLevelsTree();
