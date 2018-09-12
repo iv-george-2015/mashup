@@ -1,0 +1,54 @@
+@CHARSET "UTF-8";
+
+@keyframes showTooltip{
+   from {
+   display : none;
+   }
+   to {
+   display: block;
+   }
+}
+
+.tooltip {
+	position: absolute;
+	width: 200px;
+	height: 200px;
+	border: 2px solid #363636;
+	border-radius: 10px;
+	z-index: 200;
+	left: 700px;
+	top: 700px;
+	background-color: #dfe3e6;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0
+		rgba(0, 0, 0, 0.19);
+	animation-name: showTooltip;
+    animation-duration: 4s;
+}
+
+.tooltip .label {
+	font-size: 12px;
+	font-weight: bold;
+	padidng: 5px;
+	margin: 5px;
+}
+
+.tooltip .header {
+	width: 200px;
+	height: 30px;
+	border-radius: 8px 8px 0px 0px;
+	background-color: #8c9ba5;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	text-align: center;
+}
+
+.show {
+	display: block;
+}
+
+.hide {
+	display: none;
+}
+
+
