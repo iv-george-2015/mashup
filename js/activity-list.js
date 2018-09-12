@@ -13,28 +13,28 @@ var Node = function() {
 
 function ActivityLinkedList(dataModeller) {
 
-	this.activitiesMap_ = new Map();
+	var activitiesMap_ = new Map();
 
-	this.dataModeller_ = dataModeller;
+	var dataModeller_ = dataModeller;
 
 //	this.init_();
 
-	this.criticalActivityList_ = [] ;
+	var criticalActivityList_ = [] ;
 	
 	var init_ = function() {
-		var data = this.dataModeller_.getData();
+		var data = dataModeller_.getData();
 		for (idx in data) {
 			var node = new Node();
 			node.duration_ = data[idx]['duration'];
-			this.activitiesMap_.set(data[idx]['activity-name'], node);
+			activitiesMap_.set(data[idx]['activity-name'], node);
 //			this.container_.getNode_(data[idx]['activity-name']).innerText = node.duration_+'/' ;
 		}
-		this.activitiesMap_.forEach(function(value, key) {
+		activitiesMap_.forEach(function(value, key) {
 			for (idx in data) {
 				if (data[idx]['activity-name'] == key
 						&& data[idx]['predecessor'] != '') {
 					value['predecessors'].push(data[idx]['predecessor']);
-					this.activitiesMap_.get(data[idx]['predecessor'])['followers']
+					activitiesMap_.get(data[idx]['predecessor'])['followers']
 							.push(data[idx]['activity-name']);
 				}
 
@@ -45,14 +45,14 @@ function ActivityLinkedList(dataModeller) {
 	var forwardPass_ = function() {
 		// iterating the list of activities that are available by levels
 		// so that the previous activities are evaluated before hand .
-		var levelTree = this.dataModeller_.getLevelsTree();
+		var levelTree = dataModeller_.getLevelsTree();
 		for (level in levelTree) {
 			for (node in levelTree[level]) {
-				var value = this.activitiesMap_
+				var value = activitiesMap_
 						.get(levelTree[level][node]['activity-name']);
 				var preActDurationArray = [];
 				for (x in value['predecessors']) {
-					preActDurationArray.push(this.activitiesMap_
+					preActDurationArray.push(activitiesMap_
 							.get(value['predecessors'][x]).eft_);
 				}
 				if(preActDurationArray.length != 0){
@@ -68,17 +68,17 @@ function ActivityLinkedList(dataModeller) {
 	
 	var backwardPass_ = function() {
 	    
-		var levelTreeR = this.dataModeller_.getLevelsTree();
-		var level = this.dataModeller_.getLevels();
+		var levelTreeR = dataModeller_.getLevelsTree();
+		var level = dataModeller_.getLevels();
 		level = level -1;
 		for (;level>=0;level--) {
 			for (node in levelTreeR[level]) {
 				
-				var value = this.activitiesMap_
+				var value = activitiesMap_
 						.get(levelTreeR[level][node]['activity-name']);
 				var follActDurationArray = [];
 				for (x in value['followers']) {
-					follActDurationArray.push(this.activitiesMap_
+					follActDurationArray.push(activitiesMap_
 							.get(value['followers'][x]).lst_);
 				}
 
@@ -90,7 +90,7 @@ function ActivityLinkedList(dataModeller) {
 				value.lst_ = value.lft_ - value.duration_;
 				
 				if(value.est_==value.lst_ && value.eft_== value.lft_){
-					this.criticalActivityList_.push(levelTreeR[level][node]['activity-name']);
+					criticalActivityList_.push(levelTreeR[level][node]['activity-name']);
 //					this.container_.getNode_(levelTreeR[level][node]['activity-name']).style.backgroundColor = '#e4c3e6';
 //					this.container_.getNode_(levelTreeR[level][node]['activity-name']).style.borderColor = '#f70d22';
 				}
@@ -103,7 +103,11 @@ function ActivityLinkedList(dataModeller) {
 	this.getCriticalPath = function(){
 		forwardPass_.call(this);
 		backwardPass_.call(this);
-		return Object.assign({}, this.criticalActivityList_);
+		return Object.assign({}, criticalActivityList_);
+	}
+	
+	this.getActivityMap = function(){
+		return activitiesMap_;
 	}
 
 	init_.call(this);
